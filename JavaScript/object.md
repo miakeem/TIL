@@ -191,3 +191,244 @@ console.log(foo); // {name: "Kim"}
 
 <br><br>
 
+# 4. 메서드
+
+자바스크립트의 함수는 객체(일급 객체(first-class object))다. 따라서 함수는 값으로 취급할 수 있기 때문에 프로퍼티 값으로 사용할 수 있다.
+
+### 메서드란?
+
+객체에 묶여있는 함수를 의미한다. 프로퍼티 값이 함수일 경우 일반 함수와 구분하기 위해 메서드(method)라 부른다. 
+
+```javascript
+var circle = {
+    radius: 5, // <- 프로퍼티
+    
+    getDiameter: function () { // <- 메서드
+        return 2 * this.radius; // this는 circle을 가리킨다.
+    }
+};
+
+console.log(circle.getDiameter()); // 10
+```
+
+메서드 내부에서 사용한 this 키워드는 객체 자신을 가리키는 **참조변수**이다.
+
+<br><br>
+
+## 5. 프로퍼티 접근
+
+### 프로퍼티에 접근하는 방법
+
+- **마침표 표기법(dot notation)**
+  - 마침표 프로퍼티 접근 연산자(.)를 사용
+- **대괄호 표기법(bracket notation)**
+  - 대괄호 프로퍼티 접근 연산자([...])를 사용
+
+
+
+프로퍼티 키가 식별자 네이밍 규칙을 준수하는 이름, 즉 **자바스크립트에서 사용 가능한 유효한 이름**이면 **마침표 표기법과 대괄호 표기법을 모두 사용**할 수 있다.
+
+1. 마침표 프로퍼티 접근 연산자 또는 대괄호 프로퍼티 접근 연산자의 좌측에는 객체로 평가되는 표현식을 기술하고 마침표 프로퍼티 접근 연산자의 우측 또는 대괄호 프로퍼티 접근 연산자의 내부에는 프로퍼티 키를 지정한다.
+
+2. 대괄호 표기법을 사용하는 경우 **대괄호 프로퍼티 접근 연산자 내부에 지정하는 프로퍼티 키는 반드시 따옴표로 감싼 문자열이어야 한다.** 
+
+3. 대괄호 프로퍼티 접근 연산자 내에 따옴표로 감싸지 않은 이름을 프로퍼티 키로 사용하면 자바스크립트 엔진은 식별자로 해석한다.
+4. **객체에 존재하지 않는 프로퍼티에 접근하면 undefined를 반환한다.** 이때 ReferenceError가 발생하지 않는 데 주의하자.
+
+```javascript
+var person = {
+    name: 'Kim'
+};
+
+// 1.
+console.log(person.name); // Kim
+// 2.
+console.log(person['name']) // Kim
+// 3.
+console.log(person[name]); // ReferenceError: name is not defined
+// 4.
+console.log(person.age); // undefined
+```
+
+<br>
+
+프로퍼티 키가 식별자 네이밍 규칙을 준수하지 않는 이름, 즉 **자바스크립트에서 사용 가능한 유효한 이름이 아니면 대괄호 표기법을 사용**해야 한다.
+
+단, 프로퍼티 키가 숫자로 이뤄진 문자열인 경우는 따옴표를 생략할 수 있다.
+
+<br><br>
+
+# 6. 프로퍼티 값 갱신
+
+이미 존재하는 프로퍼티의 값에 할당하면 프로퍼티 값이 갱신된다.
+
+```javascript
+var person = {
+    name: 'Kim'
+};
+
+person.name = 'Min';
+
+console.log(person) // {name: "Min"}
+```
+
+<br><br>
+
+# 7. 프로퍼티 동적 생성
+
+존재하지 않는 프로퍼티에 값을 할당하면 프로퍼티가 동적으로 생성되어 추가되고 프로퍼티 값이 할당된다.
+
+```javascript
+var person = {
+    name: 'Kim'
+};
+
+person.age = 20;
+
+console.log(person); // {name: "Kim", age: 20}
+```
+
+<br><br>
+
+# 8. 프로퍼티 삭제
+
+### delete
+
+프로퍼티 값에 접근할 수 있는 표현식인 피연산자에 delete 연산자를 사용하면 객체의 프로퍼티를 삭제한다. 그리고 존재하지 않는 프로퍼티를 삭제하면 아무런 에러 없이 무시된다.
+
+```javascript
+var person = {
+    name: 'Kim'
+};
+
+person.age = 20;
+
+delete person.age;
+
+delete person.address;
+
+console.log(person); // {name: "Kim"}
+```
+
+<br><br>
+
+# 9. ES6에서 추가된 객체 리터럴의 확장 기능
+
+## 9.1. 프로퍼티 축약 표현
+
+프로퍼티는 프로퍼티 키와 프로퍼티 값으로 구성된다. 해당 프로퍼티 값은 변수에 할당된 값이므로 이는 식별자 표현식일 수도 있다.
+
+```javascript
+// ES5
+var x = 1, y = 2;
+
+var obj = {
+    x: x,
+    y: y
+};
+
+console.log(obj) // {x: 1, y: 2}
+```
+
+<br>
+
+### ES6, 프로퍼티 키의 생략
+
+프로퍼티 값으로 변수를 사용하는 경우 변수 이름과 프로퍼티 키가 동일한 이름일 때, 프로퍼티 키를 생략(property shorthand)할 수 있다. 이때 프로퍼티 키는 변수 이름으로 자동 생성된다.
+
+```javascript
+// ES6
+let x = 1, y = 2;
+
+// 프로퍼티 축약 표현
+const obj = { x, y };
+
+console.log(obj); // {x: 1, y: 2}
+```
+
+<br>
+
+## 9.2. 계산된 프로퍼티 이름
+
+문자열 또는 문자열로 타입 변환할 수 있는 값으로 평가되는 표현식을 대괄호([...])로 묶어서 사용해 동적으로 생성한 프로퍼티 키를 말한다.
+
+### ES5
+
+객체 릴터럴 외부에서 대괄호 표기법을 사용해 프로퍼티 키를 동적으로 생성할 수 있다.
+
+```javascript
+// ES5
+var prefix = 'prop';
+var i = 0;
+
+var obj = {};
+
+// 계산된 프로퍼티 이름으로 프로퍼티 키 동적 생성
+obj[prefix + '-' + ++i] = i;
+obj[prefix + '-' + ++i] = i;
+obj[prefix + '-' + ++i] = i;
+
+console.log(obj); // {prop-1: 1, prop-2: 2, prop-3: 3}
+```
+
+<br>
+
+### ES6
+
+ES6에서는 객체 리터럴 내부에서도 계산된 프로퍼티 이름으로 프로퍼티 키를 동적 생성할 수 있다.
+
+```javascript
+// ES6
+const prefix = 'prop';
+let i = 0;
+
+// 객체 리터럴 내부에서 계산된 프로퍼티 이름으로 프로퍼티 키 동적 생성
+const obj = {
+  [`${prefix}-${++i}`]: i,
+  [`${prefix}-${++i}`]: i,
+  [`${prefix}-${++i}`]: i
+};
+
+console.log(obj); // {prop-1: 1, prop-2: 2, prop-3: 3}
+```
+
+<br>
+
+## 9.3. 메서드 축약 표현
+
+### ES5
+
+메서드를 정의하려면 프로퍼티 값으로 함수를 할당한다.
+
+```javascript
+// ES5
+var obj = {
+    name: 'Kim',
+    sayHi: function () {
+        console.log('Hi! ' + this.name);
+    }
+};
+
+obj.sayHi(); // Hi! Kim
+```
+
+<br>
+
+### ES6
+
+메서드를 정의할 때, function 키워드를 생략한 축약 표현을 사용할 수 있다.
+
+```javascript
+// ES6
+const obj = {
+    name: 'Kim',
+    // 메서드 축약 표현
+    sayHi() {
+        console.log('Hi! ' + this.name);
+    }
+};
+
+obj.sayHi(); // Hi! Kim
+```
+
+ES6의 메서드 축약 표현으로 정의한 메서드는 프로퍼티에 할당한 함수와 다르게 동작한다.
