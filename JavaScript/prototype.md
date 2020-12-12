@@ -20,7 +20,7 @@ console.log(person); // {name: "Kim", address: "Seoul"}
 
 객체는 **상태(state) 데이터와 동작(behavior)을 하나의 논리적인 단위로 묶은 복합적인 자료구조**라고 할 수 있다. 이때 객체의 상태 데이터를 프로퍼티(property), 동작을 메서드(method)라 부른다.
 
-<br>
+<br><br>
 
 ##  2. 상속과 프로토타입
 
@@ -94,7 +94,7 @@ console.log(circle2.getArea()); // 12.566370614359172
 
 **상속**은 **코드의 재사용**이란 관점에서 매우 유용하다. 생성자 함수가 생성할 모든 인스턴스가 공통적으로 사용할 프로퍼티나 메서드를 프로토타입에 미리 구현해 두면 **생성자 함수가 생성할 모든 인스턴스**는 별도의 구현 없이 **상위(부모) 객체인 프로토타입의 자산을 공유하여 사용**할 수 있다.
 
-<br>
+<br><br>
 
 ### 3. 프로토타입 객체
 
@@ -226,3 +226,197 @@ console.log(me.constructor === Person);  // true
 ```
 
 <img src="https://poiemaweb.com/assets/fs-images/19-8.png" alt="img" style="zoom:50%;" />
+
+<br><br>
+
+## 4. 리터럴 표기법에 의해 생성된 객체의 생성자 함수와 프로토타입
+
+생성자 함수에 의해 생성된 인스턴스의 프로토타입은 constructor 프로퍼티에 의해 생성자 함수와 연결되고 이때 constructor 프로퍼티는 인스턴스를 생성한 생성자 함수를 가리킨다. 
+
+```javascript
+// obj 객체를 생성한 생성자 함수는 Object다.
+const obj = new Object();
+console.log(obj.constructor === Object); // true
+```
+
+
+
+리터럴 표기법에 의한 객체 생성 방식과 같이 명시적으로 new 연산자와 함께 생성자 함수를 호출하여 인스턴스를 생성하지 않는 객체 생성 방식도 있다.
+
+```javascript
+// 객체 리터럴
+const obj = {};
+
+// 함수 리터럴
+const add = function (a, b) { return a + b; };
+
+// 배열 리터럴
+const arr = [1, 2, 3];
+
+// 정규표현식 리터럴
+const regexp = /is/ig;
+```
+
+리터럴 표기법에 의해 생성된 객체도 프로토타입이 존재하지만 프로토타입의 constructor 프로퍼티가 가리키는 생성자 함수가 반드시 객체를 생성한 생성자 함수는 아니다.
+
+```javascript
+// obj 객체는 Object 생성자 함수로 생성한 객체가 아니라 객체 리터럴로 생성했다.
+const obj = {};
+
+// 하지만 obj 객체의 생성자 함수는 Object 생성자 함수다.
+console.log(obj.constructor === Object); // true
+```
+
+obj 객체는 Object 생성자 함수로 생성한 객체가 아니 객체 리터럴로 생성된 객체이나 obj 객체는 Object 생성자 함수와 constructor 프로퍼티로 연결되어 있다. 
+
+ECMAScript 사양에 따르면 Object 생성자 함수는 다음과 같이 구현하도록 정의되어 있다.
+
+![img](https://poiemaweb.com/assets/fs-images/19-9.png)
+
+2번에서 Object 생성자 함수에 인수를 전달하지 않거나 undefined 또는 null을 인수로 전달하면서 new 연산자와 함께 호출하면 내부적으로는 추상 연산 OrdinaryObjectCreate를 호출하여 Object.prototype을 프로토타입으로 갖는 빈 객체를 생성한다.
+
+> 추상 연산(abstract operation)
+>
+> 추상 연산은 ECMAScript 사양에서 내부 동작의 구현 알고리즘을 표현한 것이다. ECMAScript 사양에서 설명을 위해 사용되는 함수와 유사한 의사 코드라고 이해하자.
+
+```javascript
+// 2. Object 생성자 함수에 의한 객체 생성
+// Object 생성자 함수는 new 연산자와 함께 호출하지 않아도 new 연산자와 함께 호출한 것과 동일하게 동작한다.
+// 인수가 전달되지 않았을 때 추상 연산 OrdinaryObjectCreate를 호출하여 빈 객체를 생성한다.
+let obj = new Object();
+console.log(obj); // {}
+```
+
+
+
+참고로 1은 class Foo extends Object {}와 같이 Object 생성자 함수를 확장한 클래스를 호출하는 경우이고, 3은 new 없이 Object 생성자 함수를 호출하는 경우다.
+
+```javascript
+// 1. new.target이 undefined나 Object가 아닌 경우
+// 인스턴스 -> Foo.prototype -> Object.prototype 순으로 프로토타입 체인이 생성된다.
+class Foo extends Object {}
+new Foo(); // Foo {}
+
+// 3. 인수가 전달된 경우에는 인수를 객체로 변환한다.
+// Number 객체 생성
+obj = new Object(123);
+console.log(obj); // Number {123}
+```
+
+
+
+객체 리터럴이 평가될 때는 다음과 같이 추상 연산 OrdinaryObjectCreate를 호출하여 빈 객체를 생성하고 프로퍼티를 추가하도록 정의되어 있다.
+
+![img](https://poiemaweb.com/assets/fs-images/19-10.png)
+
+이와 같이 **Object 생성자 함수 호출과 객체 리터럴의 평가**는 **추상 연산 OrdinaryObjectCreate를 호출하여 빈 객체를 생성하는 점에서 동일**하나 new.target의 확인이나 프로퍼티를 추가하는 처리 등 **세부 내용은 다르다**. 따라서 객체 리터럴에 의해 생성된 객체는 Object 생성자 함수가 생성한 객체가 아니다.
+
+함수 객체의 경우 Function 생성자 함수를 호출하여 생성한 함수는 렉시컬 스코프를 만들지 않고 전역 함수인 것처럼 스코프를 생성하며 클로저도 만들지 않는다. 함수 선언문과 함수 표현식을 평가하여 함수 객체를 생성한 것은 Function 생성자 함수가 아니다. 
+
+```javascript
+// foo 함수는 Function 생성자 함수로 생성한 함수 객체가 아니라 함수 선언문으로 생성했다.
+function foo() {}
+
+// 하지만 constructor 프로퍼티를 통해 확인해보면 함수 foo의 생성자 함수는 Function 생성자 함수다.
+console.log(foo.constructor === Function); // true
+```
+
+
+
+- 리터럴 표기법에 의해 생성된 객체도 상속을 위해 프로토타입이 필요하다. 
+
+- 리터럴 표기법에 의해 생성된 객체도 가상적인 생성자 함수를 갖는다.
+
+- 프로토타입은 constructor 프로퍼티에 의해 연결되어 있기 때문에 생성자 함수와 더불어 생성된다.
+
+- **프로토타입과 생성자 함수는 단독으로 존재할 수 없고 언제나 쌍(pair)으로 존재한다.**
+
+| 리터럴 표기법      | 생성자 함수 | 프로토타입         |
+| :----------------- | :---------- | :----------------- |
+| 객체 리터럴        | Object      | Object.protptype   |
+| 함수 리터럴        | Function    | Function.prototype |
+| 배열 리터럴        | Array       | Array.prototype    |
+| 정규 표현식 리터럴 | RegExp      | RegExp.protptype   |
+
+<br>
+
+<br>
+
+## 5. 프로토타입의 생성 시점
+
+**프로토타입은 생성자 함수가 생성되는 시점에 더불어 생성된다.** 프로토타입과 생성자 함수는 단독으로 존재할 수 없고 언제나 쌍으로 존재하기 때문이다.
+
+생성자 함수는 사용자가 직접 정의한 사용자 정의 생성자 함수와 자바스크립트가 기본 제공하는 빌트인 생성자 함수로 구분할 수 있다.
+
+<br>
+
+### 5.1. 사용자 정의 생성자 함수와 프로토타입 생성 시점
+
+내부 메서드 [[Construct]]를 갖는 함수 객체(일반 함수(함수 선언문, 함수 표현식)로 정의한 함수 객체)는 new 연산자와 함께 생성자 함수로서 호출할 수 있다.
+
+**constructor는 함수(생성자 함수로서 호출 가능) 정의가 평가되어 함수 객체를 생성하는 시점에 프로토타입도 더불어 생성된다.**
+
+```javascript
+// 함수 정의(constructor)가 평가되어 함수 객체를 생성하는 시점에 프로토타입도 더불어 생성된다.
+console.log(Person.prototype); // {constructor: ƒ}
+
+// 생성자 함수
+function Person(name) {
+  this.name = name;
+}
+```
+
+non-constructor는 프로토타입이 생성되지 않는다.
+
+```javascript
+// 화살표 함수는 non-constructor다.
+const Person = name => {
+  this.name = name;
+};
+
+// non-constructor는 프로토타입이 생성되지 않는다.
+console.log(Person.prototype); // undefined
+```
+
+함수 선언문은 다른 코드가 실행되기 이전에 자바스크립트 엔진에 의해 먼저 실행되므로 함수 선언문으로 정의된 Person 생성자 함수는 어떤 코드보다 먼저 평가되어 함수 객체가 된다. 이때 프로토타입도 더불어 생성된다.
+
+생성된 프로토타입은 오직 constructor 프로퍼티만을 갖는 객체다. 프로토타입도 객체이고 모든 객체는 프로토타입을 가지므로 프로토타입도 자신의 프로토타입을 갖는다. 생성된 프로토타입의 프로토타입은 Object.prototype이다.
+
+<img src="https://poiemaweb.com/assets/fs-images/19-12.png" alt="img" style="zoom:50%;" />
+
+<br>
+
+### 5.2. 빌트인 생성자 함수와 프로토타입 생성 시점
+
+- 빌트인 생성자 함수(Object, String, Number 등)도 일반 함수와 마찬가지로 빌트인 생성자 함수가 생성되는 시점에 프로토타입이 생성된다. 
+
+- 모든 빌트인 생성자 함수는 전역 객체가 생성되는 시점에 생성된다. 
+
+- 생성된 프로토타입은 빌트인 생성자 함수의 prototype 프로퍼티에 바인딩된다.
+
+<img src="https://poiemaweb.com/assets/fs-images/19-13.png" alt="img" style="zoom:50%;" />
+
+> 전역 객체(global object)
+>
+> 전역 객체는 코드가 실행되기 이전 단계에 자바스크립트 엔진에 의해 생성되는 특수한 객체이다. 전역 객체는 클라이언트 사이드 환경(브라우저)에서는 window, 서버 사이드 환경(Node.js)에서는 global 객체를 의미한다.
+> 전역 객체는 표준 빌트인 객체(Object, String, Number, Function, Array 등)들과 환경에 따른 호스트 객체(클라이언트 web API 또는 Node.js의 호스트 API), 그리고 var 키워드로 선언한 전역 변수와 전역 함수를 프로퍼티로 갖는다. Math, Reflect, JSON을 제외한 표준 빌트인 객체는 모두 생성자 함수이다.
+
+```javascript
+// 전역 객체 window는 브라우저에 종속적이므로 아래 코드는 브라우저 환경에서 실행해야 한다.
+// 빌트인 객체인 Object는 전역 객체 window의 프로퍼티다.
+window.Object === Object // true
+```
+
+<br>
+
+<br>
+
+## 6. 객체 생성 방식과 프로토타입의 결정
+
+객체는 다음과 같이 다양한 생성 방법이 있다.
+
+- 객체 리터럴
+- Object 생성자 함수
+- 생성자 함수
+- Object.create 메서드
+- 클래스 (ES6)
