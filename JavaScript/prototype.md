@@ -420,3 +420,273 @@ window.Object === Object // true
 - 생성자 함수
 - Object.create 메서드
 - 클래스 (ES6)
+
+공통점 : 추상 연산 OrdinaryObjectCreate에 의해 생성된다.
+
+<br>
+
+### 6.1. 객체 리터럴에 의해 생성된 객체의 프로토타입
+
+자바스크립트 엔진은 추상 연산 OrdinaryObjectCreate를 호출하여 객체 리터럴을 평가하여 객체를 생성한다. 추상 연산 OrdinaryObjectCreate에 전달되는 프로토타입은 Object.prototype으로 다시 말해,  객체 리터럴에 의해 생성되는 객체의 프로토타입은 Object.prototype이다.
+
+
+
+```javascript
+const obj = { x: 1 };
+```
+
+<img src="https://poiemaweb.com/assets/fs-images/19-14.png" alt="img" style="zoom:50%;" />
+
+- 객체 리터럴에 의해 생성된 obj 객체는 Object.prototype을 프로토타입으로 갖게 되며, 이로써 Object.prototype을 상속받는다.
+- **obj 객체**는 constructor 프로퍼티와 hasOwnProperty 메서드 등을 소유하지 않지만 자신의 프로토타입인 **Object.prototype의 constructor 프로퍼티와 hasOwnProperty 메서드**를 자신의 자산인 것처럼 **자유롭게 사용**할 수 있다.
+- obj 객체가 자신의 프로토타입인 Object.prototype 객체를 상속받았기 때문이다.
+
+```javascript
+const obj = { x: 1 };
+
+// 객체 리터럴에 의해 생성된 obj 객체는 Object.prototype을 상속받는다.
+console.log(obj.constructor === Object); // true
+console.log(obj.hasOwnProperty('x'));    // true
+```
+
+<br>
+
+### 6.2. Object 생성자 함수에 의해 생성된 객체의 프로토타입
+
+- Object 생성자 함수를 인수 없이 호출하면 빈 객체가 생성된다.
+- Object 생성자 함수를 호출하면 추상 연산 OrdinaryObjectCreate가 호출 된다.
+- 이때 추상 연산 OrdinaryObjectCreate에 전달되는 프로토타입은 Object.prototype이다.
+- Object 생성자 함수에 의해 생성된 obj 객체는 Object.prototype을 프로토타입으로 갖게 되며, 이로써 Object.prototype을 상속받는다.
+
+```javascript
+const obj = new Object();
+obj.x = 1;
+```
+
+<img src="https://poiemaweb.com/assets/fs-images/19-15.png" alt="img" style="zoom:50%;" />
+
+
+
+- 객체 생성 방식의 차이
+  - 객체 리터럴 : 객체 리터럴 내부에 프로퍼티를 추가한다.
+  - Object 생성자 함수 : 빈 객체를 생성한 이후 프로퍼티를 푸가해야 한다.
+
+<br>
+
+### 6.3. 생성자 함수에 의해 생성된 객체의 프로토타입
+
+- new 연산자와 함께 생성자 함수를 호출하여 인스턴스를 생성하면 추상 연산 OrdinaryObjectCreate가 호출 된다.
+- 추상 연산 OrdinaryObjectCreate에 전달되는 프로토타입은 생성자 함수의 prototype 프로퍼티에 바인딩되어 있는 객체다.
+
+- 즉, 생성자 함수에 의해 생성되는 객체의 프로토타입은 생성자 함수의 prototype 프로퍼티에 바인딩되어 있는 객체이다.
+
+```javascript
+function Person(name) {
+  this.name = name;
+}
+
+const me = new Person('Lee');
+```
+
+<img src="https://poiemaweb.com/assets/fs-images/19-16.png" alt="img" style="zoom:50%;" />
+
+Object.prototype은 다양한 빌트인 메서드(hasOwnProperty, propertyIsEnumerable 등)를 갖고있지만 사용자 정의 생성자 함수 Person과 더불어 생성된 프로토타입 Person.prototype의 프로퍼티는 constructor 뿐이다.
+
+프로토타입은 객체이므로 일반 객체와 같이 프로토타입에도 프로퍼티를 추가/삭제할 수 있다. 또 추가/삭제된 프로퍼티는 프로토타입 체인에 즉각 반영된다.
+
+```javascript
+function Person(name) {
+  this.name = name;
+}
+
+// 프로토타입 메서드
+Person.prototype.sayHello = function () {
+  console.log(`Hi! My name is ${this.name}`);
+};
+
+const me = new Person('Lee');
+const you = new Person('Kim');
+
+me.sayHello();  // Hi! My name is Lee
+you.sayHello(); // Hi! My name is Kim
+```
+
+Person 생성자 함수를 통해 생성된 모든 객체는 프로토타입에 추가된 sayHello 메서드를 상속받아 자신의 메서드처럼 사용할 수 있다.
+
+<img src="https://poiemaweb.com/assets/fs-images/19-17.png" alt="img" style="zoom:50%;" />
+
+<br>
+
+<br>
+
+## 7. 프로토타입 체인
+
+```javascript
+function Person(name) {
+  this.name = name;
+}
+
+// 프로토타입 메서드
+Person.prototype.sayHello = function () {
+  console.log(`Hi! My name is ${this.name}`);
+};
+
+const me = new Person('Lee');
+
+// hasOwnProperty는 Object.prototype의 메서드다.
+console.log(me.hasOwnProperty('name')); // true
+```
+
+- me 객체(Person 생성자 함수에 의해 생성)는 Object.prototype의 메서드인 hasOwnProperty를 호출할 수 있다.
+
+- me 객체가 Person.prototype 뿐만 아니라 Object.prototype도 상속받았다는 것을 의미이다.
+
+- me 객체의 프로토타입은 Person.prototype이다.
+
+- Person.prototype의 프로토타입은 Object.prototype이다. 프로토타입의 프로토타입은 언제나 Object.prototype이다.
+
+<img src="https://poiemaweb.com/assets/fs-images/19-18.png" alt="img" style="zoom:50%;" />
+
+#### 프로토타입 체인
+
+**자바스크립트는 객체의 프로퍼티(메서드 포함)에 접근하려고 할 때 해당 객체에 접근하려는 프로퍼티가 없다면 [[Prototype]] 내부 슬롯의 참조를 따라 자신의 부모 역할을 하는 프로토타입의 프로퍼티를 순차적으로 검색한다. 이를 프로토타입 체인이라 한다. 프로토타입 체인은 자바스크립트가 객체지향 프로그래밍의 상속을 구현하는 메커니즘이다.**
+
+```javascript
+// hasOwnProperty는 Object.prototype의 메서드다.
+// me 객체는 프로토타입 체인을 따라 hasOwnProperty 메서드를 검색하여 사용한다.
+me.hasOwnProperty('name'); // -> true
+```
+
+`me.hasOwnProperty('name')`과 같이 메서드를 호출하면 자바스크립트 엔진은 다음과 같은 과정을 거쳐 메서드를 검색한다. 물론 프로퍼티를 참조하는 경우도 마찬가지다.
+
+1. 먼저 hasOwnProperty 메서드를 호출한 me 객체에서 hasOwnProperty 메서드를 검색한다. me 객체에는 hasOwnProperty 메서드가 없으므로 프로토타입 체인을 따라, 다시 말해 [[Prototype]] 내부 슬롯에 바인딩되어 있는 프로토타입(위 예제의 경우 Person.prototype)으로 이동하여 hasOwnProperty 메서드를 검색한다.
+2. Person.prototype에도 hasOwnProperty 메서드가 없으므로 프로토타입 체인을 따라, 다시 말해 [[Prototype]] 내부 슬롯에 바인딩되어 있는 프로토타입(위 예제의 경우 Object.prototype)으로 이동하여 hasOwnProperty 메서드를 검색한다.
+3. Object.prototype에는 hasOwnProperty 메서드가 존재한다. 자바스크립트 엔진은 Object.prototype.hasOwnProperty 메서드를 호출한다. 이때 Object.prototype.hasOwnProperty 메서드의 this에는 me 객체가 바인딩된다.
+
+```javascript
+Object.prototype.hasOwnProperty.call(me, 'name');
+```
+
+- 프로토타입 체인의 최상위에 위치하는 객체는 언제나 Object.prototype이므로 모든 객체는 Object.prototype을 상속받는다.
+- **Object.prototype을 프로토타입 체인의 종점(end of prototype chain)**이라 한다.
+- Object.prototype의 프로토타입, 즉 [[Prototype]] 내부 슬롯의 값은 null이다.
+- 프로토타입 체인의 종점인 Object.prototype에서도 프로퍼티를 검색할 수 없는 경우, undefined를 반환한다.(에러 발생X)
+
+```javascript
+console.log(me.foo); // undefined
+```
+
+- 자바스크립트 엔진은 객체 간의 상속 관계로 이루어진 프로토타입의 계층적인 구조에서 객체의 프로퍼티를 검색한다. 
+- **프로토타입 체인은 상속과 프로퍼티 검색을 위한 메커니즘**이라고 할 수 있다
+
+- 반면, 자바스크립트 엔진은 함수의 중첩 관계로 이루어진 스코프의 계층적 구조에서 식별자를 검색한다. 
+- **스코프 체인은 식별자 검색을 위한 메커니즘**이라고 할 수 있다.
+
+<br>
+
+```javascript
+me.hasOwnProperty('name');
+```
+
+1. 먼저 스코프 체인에서 me 식별자를 검색한다. 
+2. me 식별자는 전역에서 선언되었으므로 전역 스코프에서 검색된다. 
+3. me 식별자를 검색한 다음, me 객체의 프로토타입 체인에서 hasOwnProperty 메서드를 검색한다.
+
+이처럼 **스코프 체인과 프로토타입 체인은 서로 연관없이 별도로 동작하는 것이 아니라 서로 협력하여 식별자와 프로퍼티를 검색하는 데 사용된다.**
+
+<br>
+
+<br>
+
+## 8. 오버라이딩과 프로퍼티 섀도잉
+
+```javascript
+const Person = (function () {
+  // 생성자 함수
+  function Person(name) {
+    this.name = name;
+  }
+
+  // 프로토타입 메서드
+  Person.prototype.sayHello = function () {
+    console.log(`Hi! My name is ${this.name}`);
+  };
+
+  // 생성자 함수를 반환
+  return Person;
+}());
+
+const me = new Person('Lee');
+
+// 인스턴스 메서드
+me.sayHello = function () {
+  console.log(`Hey! My name is ${this.name}`);
+};
+
+// 인스턴스 메서드가 호출된다. 프로토타입 메서드는 인스턴스 메서드에 의해 가려진다.
+me.sayHello(); // Hey! My name is Lee
+```
+
+생성자 함수로 객체(인스턴스)를 생성한 다음, 인스턴스에 메서드를 추가했다. 이를 그림으로 나타내면 다음과 같다.
+
+<img src="https://poiemaweb.com/assets/fs-images/19-19.png" alt="img" style="zoom:50%;" />
+
+- 프로토타입이 소유한 프로퍼티(메서드 포함) : 프로토타입 프로퍼티
+
+- 인스턴스가 소유한 프로퍼티 : 인스턴스 프로퍼티
+
+<br>
+
+#### 프로퍼티 섀도잉(property shadowing)
+
+상속 관계에 의해 프로퍼티가 가려지는 현상을 말한다.
+
+위의 예제를 보면 프로토타입 프로퍼티와 같은 이름의 프로퍼티를 인스턴스에 추가하면 프로토타입 체인을 따라 프로토타입 프로퍼티를 검색하여 프로토타입 프로퍼티를 덮어쓰는 것이 아니라 인스턴스 프로퍼티로 추가한다. 이때 인스턴스 메서드 sayHello는 프로토타입 메서드 sayHello를 오버라이딩했고 프로토타입 메서드 sayHello는 가려진다. 
+
+> 오버라이딩(overriding)
+>
+> 상위 클래스가 가지고 있는 메서드를 하위 클래스가 재정의하여 사용하는 방식이다.
+>
+> 오버로딩(overloading)
+>
+> 함수의 이름은 동일하지만 매개변수의 타입 또는 개수가 다른 메서드를 구현하고 매개변수에 의해 메서드를 구별하여 호출하는 방식이다. 자바스크립트는 오버로딩을 지원하지 않지만 arguments 객체를 사용하여 구현할 수는 있다.
+
+<br>
+
+프로퍼티를 삭제하는 경우.  위 예제에서 추가한 인스턴스 메서드 sayHello를 삭제해보자.
+
+```javascript
+// 인스턴스 메서드를 삭제한다.
+delete me.sayHello;
+// 인스턴스에는 sayHello 메서드가 없으므로 프로토타입 메서드가 호출된다.
+me.sayHello(); // Hi! My name is Lee
+```
+
+당연히 프로토타입 메서드가 아닌 인스턴스 메서드 sayHello가 삭제된다. 다시 한번 sayHello 메서드를 삭제하여 프로토타입 메서드의 삭제를 시도해보자.
+
+```javascript
+// 프로토타입 체인을 통해 프로토타입 메서드가 삭제되지 않는다.
+delete me.sayHello;
+// 프로토타입 메서드가 호출된다.
+me.sayHello(); // Hi! My name is Lee
+```
+
+- 하위 객체를 통해 프로토타입의 프로퍼티를 변경 또는 삭제하는 것은 불가능하다. 
+
+  다시 말해, 하위 객체를 통해 프로토타입에 get 액세스는 허용되나 set 액세스는 허용되지 않는다.
+
+<br>
+
+프로토타입 프로퍼티를 변경 또는 삭제하려면 하위 객체를 통해 프로토타입 체인으로 접근하는 것이 아니라 프로토타입에 직접 접근해야 한다.
+
+```javascript
+// 프로토타입 메서드 변경
+Person.prototype.sayHello = function () {
+  console.log(`Hey! My name is ${this.name}`);
+};
+me.sayHello(); // Hey! My name is Lee
+
+// 프로토타입 메서드 삭제
+delete Person.prototype.sayHello;
+me.sayHello(); // TypeError: me.sayHello is not a function
+```
