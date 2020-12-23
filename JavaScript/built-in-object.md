@@ -126,3 +126,271 @@ S6에서 새롭게 도입된 원시값인 심벌도 래퍼 객체를 생성한�
 null과 undefined는 래퍼 객체를 생성하지 않는다. 따라서 null과 undefined 값을 객체처럼 사용하면 에러가 발생한다.
 
 <br><br>
+
+## 4. 전역 객체
+
+#### 전역 객체(global object)
+
+코드가 실행되기 이전 단계에 자바스크립트 엔진에 의해 어떤 객체보다도 먼저 생성되는 특수한 객체이며, 계층적 구조상 어떤 객체에도 속하지 않은 모든 빌트인 객체(표준 빌트인 객체와 호스트 객체)의 최상위 객체다. 
+
+전역 객체가 최상위 객체라는 것은 프로토타입 상속 관계상에서 최상위 객체라는 의미가 아니다. 전역 객체 자신은 어떤 객체의 프로퍼티도 아니며 객체의 계층적 구조상 표준 빌트인 객체와 호스트 객체를 프로퍼티로 소유한다는 것을 말한다.
+
+
+
+#### 자바스크립트 환경에 따른 이름
+
+- 브라우저 환경 : window(또는 self, this, frames)
+- Node.js 환경 : global
+
+
+
+전역 객체의 특징은 다음과 같다.
+
+- 전역 객체는 개발자가 의도적으로 생성할 수 없다. 즉, 전역 객체를 생성할 수 있는 생성자 함수가 제공되지 않는다.
+- 전역 객체의 프로퍼티를 참조할 때 window(또는 global)를 생략할 수 있다.
+
+- 전역 객체는 Object, String, Number, Boolean, Function, Array, RegExp, Date, Math, Promise와 같은 모든 표준 빌트인 객체를 프로퍼티로 가지고 있다.
+
+- 자바스크립트 실행 환경에 따라 추가적으로 프로퍼티와 메서드를 갖는다. 
+
+  브라우저 환경에서는 DOM, BOM, Canvas, XMLHttpRequest, fetch, requestAnimationFrame, SVG, Web Storage, Web Component, Web worker와 같은 클라이언트 사이드 Web API를 호스트 객체로 제공하고 Node.js 환경에서는 Node.js 고유의 API를 호스트 객체로 제공한다.
+
+- var 키워드로 선언한 전역 변수와 선언하지 않은 변수에 값을 할당한 암묵적 전역, 그리고 전역 함수는 전역 객체의 프로퍼티가 된다. 
+
+```javascript
+// var 키워드로 선언한 전역 변수
+var foo = 1;
+console.log(window.foo); // 1
+
+// 선언하지 않은 변수에 값을 암묵적 전역. bar는 전역 변수가 아니라 전역 객체의 프로퍼티다.
+bar = 2; // window.bar = 2
+console.log(window.bar); // 2
+
+// 전역 함수
+function baz() { return 3; }
+console.log(window.baz()); // 3
+```
+
+- let이나 const 키워드로 선언한 전역 변수는 전역 객체의 프로퍼티가 아니다.  let이나 const 키워드로 선언한 전역 변수는 보이지 않는 개념적인 블록 내에 존재하게 된다.
+
+```javascript
+let foo = 123;
+console.log(window.foo); // undefined
+```
+
+- 브라우저 환경의 모든 자바스크립트 코드는 하나의 전역 객체 window를 공유한다. 이는 분리되어 있는 자바스크립트 코드가 하나의 전역을 공유한다는 의미다.
+
+<br>
+
+### 4.1. 빌트인 전역 프로퍼티
+
+전역 객체의 프로퍼티를 의미한다. 주로 애플리케이션 전역에서 사용하는 값을 제공한다.
+
+<br>
+
+#### 4.1.1. Infinity
+
+무한대를 나타내는 숫자값 Infinity를 갖는다.
+
+```javascript
+// 전역 프로퍼티는 window를 생략하고 참조할 수 있다.
+console.log(window.Infinity === Infinity); // true
+
+// 양의 무한대
+console.log(3/0);  // Infinity
+// 음의 무한대
+console.log(-3/0); // -Infinity
+// Infinity는 숫자값이다.
+console.log(typeof Infinity); // number
+```
+
+<br>
+
+#### 4.1.2. NaN
+
+- NaN 프로퍼티는 숫자가 아님(Not-a-Number)을 나타내는 숫자값 NaN을 갖는다. 
+
+- Number.NaN 프로퍼티와 같다.
+
+```javascript
+console.log(window.NaN); // NaN
+
+console.log(Number('xyz')); // NaN
+console.log(1 * 'string');  // NaN
+console.log(typeof NaN);    // number
+```
+
+<br>
+
+####  4.1.3. undefined
+
+원시 타입 undefined를 값으로 갖는다.
+
+```javascript
+console.log(window.undefined); // undefined
+
+var foo;
+console.log(foo); // undefined
+console.log(typeof undefined); // undefined
+```
+
+<br>
+
+### 4.2. 빌트인 전역 함수
+
+빌트인 전역 함수(built-in global function)는 애플리케이션 전역에서 호출할 수 있는 빌트인 함수로서 **전역 객체의 메서드**다.
+
+<br>
+
+#### eval(code)
+
+- 자바스크립트 코드를 나타내는 문자열을 인수로 전달 받는다.
+- 전달받은 문자열 코드가 표현식이라면 런타임에 평가하여 값을 생성한다.
+- 전달받은 인수가 표현식이 아닌 문이라면 런타임에 실행한다.
+- 문자열 코드가 여러 개의 문으로 이루어져 있다면 모든 문을 실행한다.
+- eval 함수는 자신이 호출된 위치에 해당하는 기존의 스코프를 동적으로 수정한다.
+- strict mode에서 eval함수는 기존의 스코프를 수정하지 않고 자신의 자체적인 스코프를 생성한다.
+- 인수로 전달받은 문자열 코드가 let, const 키워드를 사용한 변수 선언문이라면 암묵적으로 strict mode가 적용된다(자신의 자체적인 스코프를 생성한다).
+- eval 함수의 사용은 금지해야 한다.
+
+<br>
+
+#### isFinite(value)
+
+- 전달받은 인수(value)가 정상적인 유한수인지 검사하여 true / false를 반환한다.
+- value의 타입이 숫자가 아닌 경우, 숫자로 타입을 변환한 후 검사를 수행한다. 이때 인수가 NaN으로 평가되는 값이라면 false를 반환한다.
+
+<br>
+
+#### isNaN(value)
+
+- 전달받은 인수(value)가 정상적인 유한수인지 검사하여 true / false를 반환한다.
+
+- value의 타입이 숫자가 아니면, 숫자로 타입을 변환한 후 검사를 수행한다.
+
+<br>
+
+#### parseFloat(string)
+
+- 전달받은 문자열 인수를 실수로 해석(parsing)하여 반환한다.
+
+- 공백으로 구분된 문자열은 첫 번째 문자열만 변환한다.
+- 문자열의 앞뒤 공백은 무시된다.
+
+<br>
+
+#### parseInt(string, radix)
+
+- 전달받은 문자열 인수를 정수(integer)로 해석(parsing)하여 반환한다.
+- 전달받은 인수가 문자열이 아니면 문자열로 변환한 다음, 정수로 해석하여 반환한다.
+
+-  두 번째 인수로 진법을 나타내는 기수(raidx, 2 ~ 36)를 전달할 수 있다. 기수를 지정하면 첫 번째 인수로 전달된 문자열을 해당 기수의 숫자로 해석하여 반환한다. 이때 반환 값은 언제나 10진수다.
+- 기수를 생략하면 첫 번째 인수로 전달된 문자열을 10진수로 해석하여 반환한다.
+
+
+
+#### encodeURI(uri)
+
+- 완전한 URI를 문자열로 전달받아 이스케이프 처리를 위해 인코딩한다.
+
+- 인코딩이란 URI의 문자들을 이스케이프 처리하는 것을 의미한다. 
+- 이스케이프 처리는 네트워크를 통해 정보를 공유할 때 어떤 시스템에서도 읽을 수 있는 아스키 문자 셋(ASCII Character-set)으로 변환하는 것이다. 
+
+- URI 문법 형식 표준(RFC3983)에 따르면 URL은 아스키 문자 셋으로만 구성되어야 하므로 한글을 포함한 대부분의 외국어나 아스키 셋에 정의되지 않은 특수 문자를 URL에 포함하려면 이스케이프 처리가 필요하다.
+
+- 전달된 문자열을 완전한 URI 전체로 간주한다. 따라서 쿼리 파라미터 구분자로 사용되는 `=`, `?`, `&`는 인코딩하지 않는다.
+
+<br>
+
+#### decodeURI(encodedURI)
+
+- 인코딩된 URI를 전달 받아 이스케이프 처리되기 이전으로 디코딩한다.
+
+<br>
+
+#### encodeURIComponent(uriComponent)
+
+- 전달된 URI(Uniform Resource Identifier) 구성 요소(component)를 인코딩한다.
+- 인수로 전달된 문자열을 URI의 구성요소인 쿼리 스트링의 일부로 간주한다. 
+- 따라서 쿼리 스트링 구분자로 사용되는 `=`, `?`, `&`까지 인코딩한다.
+
+<br>
+
+#### decodeURIComponent(encodedURIComponent)
+
+- 인코딩된 URI의 구성요소를 전달받아 이스케이프 처리 이전으로 디코딩한다.
+
+<br>
+
+### 4.3. 암묵적 전역
+
+```javascript
+var x = 10; // 전역 변수
+
+function foo () {
+  // 선언하지 않은 식별자에 값을 할당
+  y = 20; // window.y = 20;
+}
+foo();
+
+// 선언하지 않은 식별자 y를 전역에서 참조할 수 있다.
+console.log(x + y); // 30
+```
+
+foo 함수 내의 y는 선언하지 않은 식별자이다. 
+
+따라서 `y = 20`이 실행되면 참조 에러가 발생할 것처럼 보인다. 
+
+하지만 선언하지 않은 식별자에 값을 할당하면 전역 객체의 프로퍼티가 되기 때문에 식별자y는 마치 선언된 전역 변수처럼 동작한다.
+
+
+
+#### 암묵적 전역(implicit global)
+
+위의 예제에서 foo 함수가 호출되면 자바스크립트 엔진은 y 변수에 값을 할당하기 위해 먼저 스코프 체인을 통해 선언된 변수인지 확인한다. 이때 foo 함수의 스코프와 전역 스코프 어디에서도 y 변수의 선언을 찾을 수 없으므로 참조 에러가 발생한다. 하지만 자바스크립트 엔진은 `y = 20`을 `window.y = 20`으로 해석하여 전역 객체에 프로퍼티를 동적 생성한다. 결국 y는 전역 객체의 프로퍼티가 되어 마치 전역 변수처럼 동작한다. 
+
+
+
+하지만 y는 변수 선언 없이 단지 전역 객체의 프로퍼티로 추가되었을 뿐이다. 따라서 y는 변수가 아니다. y는 변수가 아니므로 변수 호이스팅이 발생하지 않는다.
+
+```javascript
+// 전역 변수 x는 호이스팅이 발생한다.
+console.log(x); // undefined
+// 전역 변수가 아니라 단지 전역 객체의 프로퍼티인 y는 호이스팅이 발생하지 않는다.
+console.log(y); // ReferenceError: y is not defined
+
+var x = 10; // 전역 변수
+
+function foo () {
+  // 선언하지 않은 식별자에 값을 할당
+  y = 20; // window.y = 20;
+}
+foo();
+
+// 선언하지 않은 식별자 y를 전역에서 참조할 수 있다.
+console.log(x + y); // 30
+```
+
+또한 변수가 아니라 단지 프로퍼티인 y는 delete 연산자로 삭제할 수 있다. 전역 변수는 프로퍼티이지만 delete 연산자로 삭제할 수 없다.
+
+```javascript
+var x = 10; // 전역 변수
+
+function foo () {
+  // 선언하지 않은 식별자에 값을 할당
+  y = 20; // window.y = 20;
+  console.log(x + y);
+}
+
+foo(); // 30
+
+console.log(window.x); // 10
+console.log(window.y); // 20
+
+delete x; // 전역 변수는 삭제되지 않는다.
+delete y; // 프로퍼티는 삭제된다.
+
+console.log(window.x); // 10
+console.log(window.y); // undefined
+```
+
