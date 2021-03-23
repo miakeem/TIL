@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Block and Inline Box</title>
+  <style>
+    p, ul {
+      border: 3px solid green;
+      padding: .5em;
+    }
+
+    span {
+      border: 10px solid orchid;
+    }
+    
+    .block, 
+    li {
+      border: 3px solid red;
+      padding: .5em;
+    }
+
+    ul {
+      display: flex;
+      list-style: none;
+    }
+
+    .block {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <p>I am a paragraph.</p>
+  <ul>
+    <li>Item One</li>
+    <li>Item Two</li>
+    <li>Item Three</li>
+  </ul>
+    <p>I am another paragraph. Some of the
+    <span class='block'>words</span>
+    have been wrapped in a span element.
+  </p>
+</body>
+</html>
